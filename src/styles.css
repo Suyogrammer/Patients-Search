@@ -16,3 +16,7 @@ button {
   padding: 2px;
   text-align: left;
 }
+
+.lighted {
+  border: 3px solid green;
+}

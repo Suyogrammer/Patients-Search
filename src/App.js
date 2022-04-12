@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "./styles.css";
 import patients from "./api.js";
 
@@ -8,64 +8,80 @@ export default function App() {
     let timeStampCon = d.getMonth() + "/" + d.getDate() + "/" + d.getFullYear();
     return { ...item, birthdate: timeStampCon };
   });
-
   const [data, setData] = useState(mapTest);
-  const [sortType, setSortType] = useState("");
 
-  const cardElements = data.map((item, idx) => (
-    <div className="card" key={idx}>
-      <p>
-        <b>First Name:</b> {item.firstName}
-      </p>
-      <p>
-        <b>Last Name:</b> {item.lastName}
-      </p>
-      <p>
-        <b>Sex:</b> {item.sex}
-      </p>
-      <p>
-        <b>Date of Birth: </b>
-        {item.birthdate}
-      </p>
-      <span>
-        <b>Conditions:</b> {item.conditions.join(", ")}
-      </span>
-    </div>
-  ));
+  const [order, setOrder] = React.useState("");
+  const [orderBy, setOrderBy] = React.useState("");
 
-  useEffect(() => {
-    // const sortArray = type => {
-    const sorted = mapTest.sort((a, b) =>
-      `${a[sortType]}`.toString().localeCompare(`${b[sortType]}`.toString())
-    );
-    setData(sorted);
-    // }
-    // sortArray(sortType);
-  }, [sortType]);
+  function descendingComparator(a, b, orderBy) {
+    if (b[orderBy] < a[orderBy]) {
+      return -1;
+    }
+    if (b[orderBy] > a[orderBy]) {
+      return 1;
+    }
+    return 0;
+  }
 
-  const Search = function (searchText) {
-    // console.log(data[0], "el val");
-    // console.log(Object.keys(data[0]), "key")
+  function getComparator(order, orderBy) {
+    return order === "desc"
+      ? (a, b) => descendingComparator(a, b, orderBy)
+      : (a, b) => -descendingComparator(a, b, orderBy);
+  }
+
+  const cardElements = data
+    .sort(getComparator(order, orderBy))
+    .map((item, idx) => (
+      // const cardElements = data.map((item, idx) => (
+      <div className="card" key={idx}>
+        <p>
+          <b>First Name:</b> {item.firstName}
+        </p>
+        <p>
+          <b>Last Name:</b> {item.lastName}
+        </p>
+        <p>
+          <b>Sex:</b> {item.sex}
+        </p>
+        <p>
+          <b>Date of Birth: </b>
+          {item.birthdate}
+        </p>
+        <span>
+          <b>Conditions:</b> {item.conditions.join(", ")}
+        </span>
+      </div>
+    ));
+
+  function search(searchText) {
     let filterVal = data.filter(
       (el) => {
-        return el.firstName.toLowerCase().includes(searchText.toLowerCase());
+        return JSON.stringify(el)
+          .toLowerCase()
+          .includes(searchText.toLowerCase());
       } // el.firstName.toLowerCase().includes(searchText.toLowerCase())
     );
-
     setData(filterVal);
-    console.log(searchText);
-  };
+  }
+
+  function getOrder(buttonClicked) {
+    if (orderBy !== buttonClicked) {
+      return "asc";
+    } else {
+      return order === "asc" ? "desc" : "asc";
+    }
+  }
 
   return (
     <div className="App">
-      <h1>Hello World</h1>
+      <h1>Patients Directory</h1>
 
       <input
         type="text"
         placeholder="Search"
         name="searchTxt"
         onChange={(e) => {
-          Search(e.target.value);
+          search(e.target.value);
         }}
       />
       {/* <button name="searchBtn" value="searchBtn" onClick={handleSearch}>
@@ -73,32 +89,49 @@ export default function App() {
       </button> */}
       <div className="box-container">
         <button
+          className={orderBy === "firstName" ? "lighted" : null}
           value="firstName"
           name="firstName"
-          onClick={(e) => setSortType(e.target.value)}
+          onClick={(e) => {
+            setOrderBy("firstName");
+            setOrder(getOrder("firstName"));
+          }}
         >
-          First Name
+          {`First Name ~ Sorted ${order}`}
         </button>
         <button
+          className={orderBy === "lastName" ? "lighted" : null}
           value="lastName"
           name="lastName"
-          onClick={(e) => setSortType(e.target.value)}
+          order="asc"
+          onClick={(e) => {
+            setOrderBy("lastName");
+            setOrder(getOrder("lastName"));
+          }}
         >
-          Last Name
+          {`Last Name ~ Sorted ${order}`}
         </button>
         <button
+          className={orderBy === "sex" ? "lighted" : null}
           value="sex"
           name="sex"
-          onClick={(e) => setSortType(e.target.value)}
+          onClick={(e) => {
+            setOrderBy("sex");
+            setOrder(getOrder("sex"));
+          }}
         >
-          Sex
+          {`Sex ~ Sorted ${order}`}
         </button>
         <button
+          className={orderBy === "birthdate" ? "lighted" : null}
           label="birthdate"
           name="birthdate"
-          onClick={(e) => setSortType(e.target.value)}
+          onClick={(e) => {
+            setOrderBy("birthdate");
+            setOrder(getOrder("birthdate"));
+          }}
         >
-          Date of Birth
+          {`Date Of Birth ~ Sorted ${order}`}
         </button>
 
         {cardElements}
