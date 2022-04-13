@@ -9,7 +9,7 @@ export default function App() {
     return { ...item, birthdate: timeStampCon };
   });
   const [data, setData] = useState(mapTest);
-
+  const [searchText, setSearchText] = useState("");
   const [order, setOrder] = React.useState("");
   const [orderBy, setOrderBy] = React.useState("");
 
@@ -30,6 +30,7 @@ export default function App() {
   }
 
   const cardElements = data
+    .filter((el) => filterSearch(el))
     .sort(getComparator(order, orderBy))
     .map((item, idx) => (
       // const cardElements = data.map((item, idx) => (
@@ -53,16 +54,28 @@ export default function App() {
       </div>
     ));
 
-  function search(searchText) {
-    let filterVal = data.filter(
-      (el) => {
-        return JSON.stringify(el)
-          .toLowerCase()
-          .includes(searchText.toLowerCase());
-      } // el.firstName.toLowerCase().includes(searchText.toLowerCase())
-    );
-    setData(filterVal);
+  function filterSearch(el) {
+    if (searchText.length === 0) {
+      return true;
+    }
+    if (searchText.length > 0) {
+      return JSON.stringify(el)
+        .toLowerCase()
+        .includes(searchText.toLowerCase());
+    }
+    return false;
   }
+
+  // function search(searchText) {
+  //   let filterVal = data.filter(
+  //     (el) => {
+  //       return searchText > 0
+  //         ? JSON.stringify(el).toLowerCase().includes(searchText.toLowerCase())
+  //         :
+  //     } // el.firstName.toLowerCase().includes(searchText.toLowerCase())
+  //   );
+  //   setData(filterVal);
+  // }
 
   function getOrder(buttonClicked) {
     if (orderBy !== buttonClicked) {
@@ -81,7 +94,7 @@ export default function App() {
         placeholder="Search"
         name="searchTxt"
         onChange={(e) => {
-          search(e.target.value);
+          setSearchText(e.target.value);
         }}
       />
       {/* <button name="searchBtn" value="searchBtn" onClick={handleSearch}>
